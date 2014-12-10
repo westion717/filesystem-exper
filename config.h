@@ -12,3 +12,11 @@
  *
  * =================================================
  */
+
+#define HD_SIZE 40000000
+#define LOGICAL_BLOCK_SIZE 1024
+#define PHYSICAL_BLOCK_SIZE 1024
+
+
+#define IMAP_BLOCK_SIZE 2
+#define ZMAP_BLOCK_SIZE 2
