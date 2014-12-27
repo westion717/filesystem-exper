@@ -3,7 +3,7 @@
  *
  *       Filename:  hd.c
  *
- *    Description: read and write data to txt as a hd 
+ *    Description: read and write logical block by api in hd_driver.c
  *
  *        Version:  0.01
  *        Created:  Wed Dec 10 20:20:37 2014
@@ -14,49 +14,36 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include "config.h"
 #include "hd.h"
-
-static FILE *fp;
+#include "hd_driver.h"
 
 void initFile(char* fileName)
 {
-
-	if((fp=fopen(fileName,"r+"))==NULL){
-		printf("\nCannot open file strike any key exit!");
-		exit(1);
-	}
+	_initFile(fileName);
 }
 
 
 void release()
 {
-	fclose(fp);
+	_release();
 }
 
 void _read(blk * block,int blockNo)
 {
-	char ch;
-	int i=0;
 
-	fseek(fp, (blockNo-1)*PHYSICAL_BLOCK_SIZE,SEEK_SET);  
-	while((ch=fgetc(fp))!=EOF && i<PHYSICAL_BLOCK_SIZE){
-		block->data[i]=ch;
-		i++;
+	for(int i=0;i<NUM_PHY_LOG;i++)
+	{
+		_read_phy_block(block->data[i],blockNo+i);
 	}
-
 
 }
 
 void _write(blk* block,int blockNo)
 {
-	int i=0;
-
-	fseek(fp, (blockNo-1)*PHYSICAL_BLOCK_SIZE,SEEK_SET);  
-	while(i<PHYSICAL_BLOCK_SIZE){
-		fputc(block->data[i],fp);
-		i++;
+	for(int i=0;i<NUM_PHY_LOG;i++)
+	{
+		_write_phy_block(block->data[i],blockNo+i);
 	}
 }
 

@@ -1,22 +1,24 @@
 /*
  * =================================================
  *
- *       Filename:  super.h
+ *       Filename:  super_test.c
  *
  *    Description:  
  *
  *        Version:  0.01
- *        Created:  Wed Dec 10 16:11:50 2014
+ *        Created:  Sat Dec 27 14:45:01 2014
  *         Author:  westion, westion717@gmail.com
  *        Company:  ZJUT
  *
  * =================================================
  */
+#include<stdio.h>
+#include "super.h"
 
-#ifndef SUPER_H_HEADER
-#define SUPER_H_HEADER
+int main(int argc, char** argv){
 
-void initSuperBlock();
-
-void printInfo();
-#endif
+	
+	initSuperBlock();
+	printInfo();
+    return 0;
+}

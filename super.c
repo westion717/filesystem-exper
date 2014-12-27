@@ -16,7 +16,6 @@
 
 #include "super.h"
 #include "config.h"
-#include "hd.h"
 #include <stdio.h>
 
 
@@ -73,19 +72,6 @@ void printInfo()
 
 
 
-blk block;
 
 
 
-int main()
-{
-
-	initSuperBlock();
-	//printInfo();
-	initFile("./input.txt");
-
-	_read(&block,1);
-
-	for(int i=0;i<PHYSICAL_BLOCK_SIZE;i++)
-		printf("%d",block.data[i]);
-}

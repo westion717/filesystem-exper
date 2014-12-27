@@ -3,7 +3,7 @@
  *
  *       Filename:  hd.h
  *
- *    Description:  
+ *    Description: block is a logical block 
  *
  *        Version:  0.01
  *        Created:  Wed Dec 10 20:21:06 2014
@@ -20,7 +20,7 @@
 
 struct Block
 {
-	char data[PHYSICAL_BLOCK_SIZE];
+	char data[NUM_PHY_LOG][PHYSICAL_BLOCK_SIZE];
 };
 
 typedef struct Block blk;
