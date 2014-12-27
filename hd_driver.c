@@ -3,7 +3,7 @@
  *
  *       Filename:  hd_driver.c
  *
- *    Description: read and write physical data to txt as a real desk 
+ *    Description: read and write physical data to txt as a real disk 
  *
  *        Version:  0.01
  *        Created:  Sat Dec 27 14:19:28 2014

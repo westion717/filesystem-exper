@@ -21,6 +21,7 @@
 struct Block
 {
 	char data[NUM_PHY_LOG][PHYSICAL_BLOCK_SIZE];
+	int is_changed;
 };
 
 typedef struct Block blk;

@@ -21,3 +21,5 @@
 
 #define IMAP_BLOCK_SIZE 2
 #define ZMAP_BLOCK_SIZE 2
+
+#define BUFFER_SIZE 10

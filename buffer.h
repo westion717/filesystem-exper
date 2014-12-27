@@ -1,24 +1,25 @@
 /*
  * =================================================
  *
- *       Filename:  super.h
+ *       Filename:  buffer.h
  *
  *    Description:  
  *
  *        Version:  0.01
- *        Created:  Wed Dec 10 16:11:50 2014
+ *        Created:  Sat Dec 27 15:52:19 2014
  *         Author:  westion, westion717@gmail.com
  *        Company:  ZJUT
  *
  * =================================================
  */
 
-#ifndef SUPER_H_HEADER
-#define SUPER_H_HEADER
+#include "hd.h" 
 
-void initSuperBlock();
-void printInfo();
+#ifndef BUFFER_H_HEADER
+#define BUFFER_H_HEADER
 
-short get_s_imap_blocks();
-short get_s_zmap_blocks();
+void initDiskBuf();
+const blk* _read_from_buf(int blockNo);
+void _write_to_buf(const blk* block,int blockNo);
+
 #endif

@@ -33,9 +33,9 @@ struct super
 
 static struct super superBlock;
 
-void initSuperBlock()
+void initSuperBlock(long capacity)
 {
-	superBlock.s_nzones=HD_SIZE/LOGICAL_BLOCK_SIZE; //磁盘总大小/逻辑块大小
+	superBlock.s_nzones=capacity/LOGICAL_BLOCK_SIZE; //磁盘总大小/逻辑块大小
 	superBlock.s_magic=0x137f;
 	superBlock.s_imap_blocks=IMAP_BLOCK_SIZE;
 	superBlock.s_zmap_blocks=ZMAP_BLOCK_SIZE;
@@ -54,7 +54,15 @@ if((superBlock.s_imap_blocks*LOGICAL_BLOCK_SIZE*8-1)*32%LOGICAL_BLOCK_SIZE!=0)
 };
 
 
+short get_s_imap_blocks()
+{
+	return superBlock.s_imap_blocks;
+}
 
+short get_s_zmap_blocks()
+{
+	return superBlock.s_zmap_blocks;
+}
 
 
 void printInfo()
