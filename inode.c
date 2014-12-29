@@ -12,17 +12,61 @@
  *
  * =================================================
  */
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "buffer.h"
+#include "config.h"
+#include "super.h"
+#include "tool.h"
+#include "inode.h"
+#include "bitmap.h"
 
 
-struct inode
+typedef struct inodeBuf
 {
-	short i_mode;	//文件的类型和属性
-	short i_uid;	//文件宿主id
-	long i_size;	//文件长度
-	long i_mtime;	//修改时间
-	char i_gid;		//文件宿主的组id
-	char i_nlinks;	//有多少个文件目录项指向该节点
-	short i_zone[9];	//文件所占用磁盘块号数组
-};
+	struct inode data[LOGICAL_BLOCK_SIZE/32];
+	int is_changed;
+	unsigned int no;
+}inode_buf;
 
+
+static inode_buf ibuf;
+
+static void initIBuf();
+
+static void initIBuf()
+{
+	unsigned int first_i_block_no=get_s_imap_blocks()+get_s_zmap_blocks()+SUPER_BLOCK_SIZE+1; 
+		my_memcpy(_read_from_buf(first_i_block_no)->data,ibuf.data,LOGICAL_BLOCK_SIZE);
+		ibuf.no=first_i_block_no;
+		ibuf.is_changed=0;
+}
+
+void initINode()
+{
+	initIBuf();
+	initBitMap();
+}
+
+void insertINode(struct inode* inode)
+{
+	unsigned int pos = findIPos();
+	printf("pos=%d\n",pos);
+	unsigned int tempNo=pos*32/LOGICAL_BLOCK_SIZE+1+get_s_imap_blocks()+get_s_zmap_blocks()+1;
+	printf("tempNo=%d\n",tempNo);
+	if(ibuf.no!=tempNo)
+	{
+		if(ibuf.is_changed) 
+		{
+			blk block; 
+			my_memcpy(ibuf.data,block.data,LOGICAL_BLOCK_SIZE);
+			_write_to_buf(&block,ibuf.no);
+		}
+		my_memcpy(_read_from_buf(tempNo)->data,ibuf.data,LOGICAL_BLOCK_SIZE);
+	}
+	pos%=LOGICAL_BLOCK_SIZE/32;
+	ibuf.data[pos]=*inode;
+	ibuf.is_changed=1;
+}
 

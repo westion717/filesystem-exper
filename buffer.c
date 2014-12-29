@@ -27,7 +27,7 @@ typedef struct buf
 
 static disk_buffer buf;
 
-static int findPos(int pos);
+static int findPos(int blockNo);
 static int replaceOne();
 static int findEmptyPos();
 
