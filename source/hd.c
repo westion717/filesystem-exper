@@ -32,7 +32,7 @@ void release()
 void _read(blk * block,int blockNo)
 {
 
-	int pos=blockNo*(NUM_PHY_LOG-1)+1;
+	int pos=(blockNo-1)*NUM_PHY_LOG+1;
 	for(int i=0;i<NUM_PHY_LOG;i++)
 	{
 		_read_phy_block(block->data[i],pos+i);
@@ -42,7 +42,7 @@ void _read(blk * block,int blockNo)
 
 void _write(blk* block,int blockNo)
 {
-	int pos=blockNo*(NUM_PHY_LOG-1)+1;
+	int pos=(blockNo-1)*NUM_PHY_LOG+1;
 	for(int i=0;i<NUM_PHY_LOG;i++) 
 	{
 		_write_phy_block(block->data[i],pos+i);
