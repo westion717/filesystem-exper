@@ -25,8 +25,30 @@
 #define NO_SUCH_ENTRY -3
 #define DELETE_ENTRY_ERROR -4
 
+
+
+typedef struct DirEntry
+{
+	char dirName[14];
+	short i_node_num;
+}dir_entry;
+
+
+typedef struct DirBuf
+{
+	dir_entry entrys[LOGICAL_BLOCK_SIZE/16];
+	int is_changed;
+	unsigned int no;//所在逻辑块编号
+	int size;
+}dir_buf;
+
+
+
+
 int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid);
 short _findINodeByName(char* name);
 int _delete_dir_entry(char* name);
+void initRootDir();
+void printDirInfo();
 
 #endif

@@ -17,9 +17,13 @@
 #include <stdlib.h>
 #include "super.h"
 #include "config.h"
+#include "dir_entry.h"
 
 static struct super superBlock;
+static dir_buf dirBuf;
+
 static void writeSuper(long capacity);
+static void writeRootDir();
 
 int main(int argc, char** argv){
 
@@ -44,21 +48,27 @@ int main(int argc, char** argv){
 	fwrite(&superBlock,sizeof(struct super),1,fp);
 	char t=0;
 	fseek(fp,LOGICAL_BLOCK_SIZE,SEEK_SET);
-	for(int i=0;i<ZMAP_BLOCK_SIZE*LOGICAL_BLOCK_SIZE;i++)
+	char l=1;
+	fwrite(&l,1,1,fp);
+	for(int i=1;i<ZMAP_BLOCK_SIZE*LOGICAL_BLOCK_SIZE;i++)
 	{
 		fwrite(&t,1,1,fp);
 	}
-	for(int i=0;i<IMAP_BLOCK_SIZE*LOGICAL_BLOCK_SIZE;i++)
+	fwrite(&l,1,1,fp);
+	for(int i=1;i<IMAP_BLOCK_SIZE*LOGICAL_BLOCK_SIZE;i++)
 	{
 		fwrite(&t,1,1,fp);
 	}
+	writeRootDir();
+	fseek(fp,(superBlock.s_first_data_zone-1)*LOGICAL_BLOCK_SIZE,SEEK_SET);
+	fwrite(dirBuf.entrys,sizeof(dir_entry),LOGICAL_BLOCK_SIZE/16,fp);	
 
-    return 0;
+    return 0; 
 }
 
 static void writeSuper(long capacity)
 {
-	superBlock.s_nzones=capacity/LOGICAL_BLOCK_SIZE; //磁盘总大小/逻辑块大小
+	 superBlock.s_nzones=capacity/LOGICAL_BLOCK_SIZE; //磁盘总大小/逻辑块大小
 	superBlock.s_magic=0x137f;
 	superBlock.s_imap_blocks=IMAP_BLOCK_SIZE;
 	superBlock.s_zmap_blocks=ZMAP_BLOCK_SIZE;
@@ -74,4 +84,12 @@ if((superBlock.s_imap_blocks*LOGICAL_BLOCK_SIZE*8-1)*32%LOGICAL_BLOCK_SIZE!=0)
 	superBlock.s_ninodes=IMAP_BLOCK_SIZE*LOGICAL_BLOCK_SIZE*8-1;
 	superBlock.s_log_zone_size=0;
 	superBlock.s_max_size=(512*512+512+7)*LOGICAL_BLOCK_SIZE;
+}
+
+static void writeRootDir()
+{
+	for(int i=0;i<LOGICAL_BLOCK_SIZE/16;i++)
+	{
+		dirBuf.entrys[i].i_node_num=-1;
+	}
 }

@@ -26,25 +26,10 @@
 
 
 
-typedef struct DirEntry
-{
-	char dirName[14];
-	short i_node_num;
-}dir_entry;
-
-
-typedef struct DirBuf
-{
-	dir_entry entrys[LOGICAL_BLOCK_SIZE/16];
-	int is_changed;
-	unsigned int no;//所在逻辑块编号
-	int size;
-}dir_buf;
 
 static dir_buf dirBuf;
 
 static void readDirBuf(int logical_block_num);
-static void readRoot();
 static int findEntryByName(char* name);
 static void moveToDir(char* name);
 static int find_entry();
@@ -121,7 +106,7 @@ int _delete_dir_entry(char* name)
 
 static void moveToDir(char* name)
 {
-	 readRoot();
+	readDirBuf(get_first_data_zone());
 	char* temp1 = strchr(name,'/');
 	temp1++;
 	char* temp2 = strchr(temp1,'/');
@@ -186,8 +171,21 @@ static void readDirBuf(int logical_block_num)
 	dirBuf.size=LOGICAL_BLOCK_SIZE/16;
 }
 
-static void readRoot()
+void initRootDir()
 {
+	dirBuf.is_changed=0;
 	readDirBuf(get_first_data_zone());
 }
+
+void printDirInfo()
+{
+	printf("dir list:\n");
+	for(int i=0;i<dirBuf.size;i++)
+	{
+		printf("inode_num=%d,",dirBuf.entrys[i].i_node_num);
+		if(dirBuf.entrys[i].i_node_num>0)
+			printf("dirname=%s",dirBuf.entrys[i].dirName);
+	}
+}
+
 
