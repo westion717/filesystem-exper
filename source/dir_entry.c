@@ -23,6 +23,7 @@
 #include "dir_entry.h"
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 
 
@@ -31,7 +32,7 @@ static dir_buf dirBuf;
 
 static void readDirBuf(int logical_block_num);
 static int findEntryByName(char* name);
-static void moveToDir(char* name);
+static char* moveToDir(char* name);
 static int find_entry();
 
 static int find_entry()
@@ -46,11 +47,17 @@ static int find_entry()
 
 int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
 {
-	moveToDir(name);
+	char* lastName=moveToDir(name);
+	
+	if(lastName==NULL)
+	{
+		printf("no such dir for %s\n",name);
+		return ADD_ENTRY_ERROR;
+	}
  	int pos=find_entry();
 	if(pos==DIR_FULL_ERROR)
 	{
-		printf("create fail;dir is full\n");
+	 	printf("create fail;dir is full\n");
 		return DIR_FULL_ERROR;
 	}
 	short ipos=_create_file(i_mode,i_uid,i_gid);
@@ -76,7 +83,7 @@ int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
 		default:printf("imode error\n");break;
 	}
 	dirBuf.entrys[pos].i_node_num=ipos;
-	strcpy(dirBuf.entrys[pos].dirName,strrchr(name,'/')+1);
+	strcpy(dirBuf.entrys[pos].dirName,lastName);
 	dirBuf.is_changed=1;
 	return NO_DIR_ERROR;
 }
@@ -100,16 +107,18 @@ int _delete_dir_entry(char* name)
 	}
 	else
 		return DELETE_ENTRY_ERROR;
-
-
 }
 
-static void moveToDir(char* name)
+static char* moveToDir(char* name)
 {
 	readDirBuf(get_first_data_zone());
-	char* temp1 = strchr(name,'/');
+	char* temp1;
+	char* temp2;
+	temp1 = strchr(name,'/');
+	if(temp1==NULL)
+		return name;
 	temp1++;
-	char* temp2 = strchr(temp1,'/');
+	temp2 = strchr(temp1,'/');
 	char tempName[14];
 	while(temp2!=NULL)
 	{	
@@ -119,22 +128,29 @@ static void moveToDir(char* name)
 		if(index==NO_SUCH_ENTRY)
 		{
 			printf("no such entry\n");
-			return;
+			return NULL;
 		}
 		const struct inode* node = findINode(dirBuf.entrys[index].i_node_num);
 		readDirBuf(node->i_zone[0]);
 		temp1=temp2+1;
 		temp2=strchr(temp1,'/');
 	}
+	char* last = strrchr(name,'/');
+	last+=1;
+	return last;
 }
 
 
 
 short _findINodeByName(char* name)
 {
-	moveToDir(name);
-	char* last = strrchr(name,'/');
-	int index = findEntryByName(last+1);
+	char* lastName=moveToDir(name);
+	if(lastName==NULL)
+	{
+		printf("no such dir for %s\n",name);
+		return NO_SUCH_ENTRY;
+	}
+	int index = findEntryByName(lastName);
 	if(index==NO_SUCH_ENTRY)
 	{
 		printf("no such file\n");
@@ -158,6 +174,8 @@ static int findEntryByName(char* name)
 
 static void readDirBuf(int logical_block_num)
 {
+	if(dirBuf.no==(unsigned int)logical_block_num)
+		return;
 	if(dirBuf.is_changed==1)
 	{
 		blk tempBlock;
@@ -183,8 +201,7 @@ void printDirInfo()
 	for(int i=0;i<dirBuf.size;i++)
 	{
 		printf("inode_num=%d,",dirBuf.entrys[i].i_node_num);
-		if(dirBuf.entrys[i].i_node_num>0)
-			printf("dirname=%s",dirBuf.entrys[i].dirName);
+		printf("dirname=%s\n",dirBuf.entrys[i].dirName);
 	}
 }
 

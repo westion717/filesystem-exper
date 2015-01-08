@@ -47,7 +47,6 @@ static void initIBuf()
 void initINode()
 {
 	initIBuf();
-	initBitMap();
 }
 
 short insertINode(struct inode* inode)
@@ -58,7 +57,6 @@ short insertINode(struct inode* inode)
 		printf("inode is full\n");
 		return NODE_FULL_ERROR;
 	}
-	printf("pos=%d\n",pos);
 	int index=findINodeEntryIndex(pos);
 	ibuf.data[index]=*inode;
 	ibuf.is_changed=1;
@@ -82,7 +80,6 @@ struct inode* findINode(unsigned int pos)
 static int findINodeEntryIndex(unsigned int pos)
 {
 	unsigned int tempNo=pos*32/LOGICAL_BLOCK_SIZE+1+get_s_imap_blocks()+get_s_zmap_blocks()+1;
-	printf("tempNo=%d\n",tempNo);
 	if(ibuf.no!=tempNo)
 	{
 		if(ibuf.is_changed) 
