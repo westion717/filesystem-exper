@@ -40,7 +40,7 @@ int main(int argc, char** argv){
 	short inum1 =_findINodeByName("/home/me/a.txt");	
 	const struct inode* node1=findINode(inum1);
 	printf("/home/me/a.txt,mode=%d\n",node1->i_mode);
-	printf("/home/me/a.txt,=%ld\n",node1->i_size);
+	printf("/home/me/a.txt,=%d\n",node1->i_zone[0]);
 
 
 	releaseBitMap();

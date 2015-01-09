@@ -35,6 +35,7 @@ static inode_buf ibuf;
 
 static void initIBuf();
 static int findINodeEntryIndex(unsigned int pos);
+static void flushINodeBuf();
 
 static void initIBuf()
 {
@@ -49,7 +50,7 @@ void initINode()
 	initIBuf();
 }
 
-short insertINode(struct inode* inode)
+short insertINode(const struct inode* inode)
 {
 	int pos = findIPos();
 	if(pos==BIT_FULL_ERROR)
@@ -60,7 +61,16 @@ short insertINode(struct inode* inode)
 	int index=findINodeEntryIndex(pos);
 	ibuf.data[index]=*inode;
 	ibuf.is_changed=1;
+	flushINodeBuf();
 	return pos;
+}
+
+void modifyINode(short pos,const struct inode* node)
+{
+	int index=findINodeEntryIndex(pos);
+	ibuf.data[index]=*node;
+	ibuf.is_changed=1;
+	flushINodeBuf();
 }
 
 void deleteINode(unsigned int pos)
@@ -69,12 +79,21 @@ void deleteINode(unsigned int pos)
 	ibuf.data[index].i_mode=MODE_NO_INODE;
 	releaseIPos(pos);
 	ibuf.is_changed=1;
+	flushINodeBuf();
 }
 
-struct inode* findINode(unsigned int pos)
+const struct inode* findINode(unsigned int pos)
 {
 	int index=findINodeEntryIndex(pos);	
 	return &ibuf.data[index];	
+}
+
+static void flushINodeBuf()
+{
+	if(ibuf.is_changed==1)
+	{
+		_write_to_buf((const blk*)ibuf.data,ibuf.no);
+	}
 }
 
 static int findINodeEntryIndex(unsigned int pos)

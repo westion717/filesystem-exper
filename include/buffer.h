@@ -21,5 +21,6 @@
 void initDiskBuf();
 const blk* _read_from_buf(int blockNo);
 void _write_to_buf(const blk* block,int blockNo);
+void flushBuff();
 
 #endif

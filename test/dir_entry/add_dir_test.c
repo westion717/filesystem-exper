@@ -19,7 +19,6 @@
 #include "bitmap.h"
 #include "dir_entry.h"
 #include "inode.h"
-#include "inode.h"
 
 
 int main(int argc, char** argv){

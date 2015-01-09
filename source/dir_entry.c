@@ -34,6 +34,7 @@ static void readDirBuf(int logical_block_num);
 static int findEntryByName(char* name);
 static char* moveToDir(char* name);
 static int find_entry();
+static void flushDirBuf();
 
 static int find_entry()
 {
@@ -66,7 +67,7 @@ int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
  		printf("create dir failed;insert node wrong");
 		return ADD_ENTRY_ERROR;
 	}
-	struct inode* node=findINode(ipos);
+	struct inode node=*findINode(ipos);
 	short blk_num;
 	switch(i_mode)
 	{
@@ -74,10 +75,21 @@ int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
 				blk_num=(short)findZPos();
 				if(blk_num==BIT_FULL_ERROR)
 				{
+					deleteINode(ipos);
 					printf("logical is full");
 					return NO_DIR_ERROR; 
 				}
-				node->i_zone[0]=blk_num;
+
+				dir_entry entrys[LOGICAL_BLOCK_SIZE/16];
+				for(int i=0;i<LOGICAL_BLOCK_SIZE/16;i++)
+				{
+				entrys[i].i_node_num=-1;
+				strcpy(entrys[i].dirName,"");
+				}
+
+				_write_to_buf((const blk*)entrys,blk_num+get_first_data_zone());
+				node.i_zone[0]=blk_num;
+				modifyINode(ipos,&node);
 				break;
 		case MODE_FILE:break;
 		default:printf("imode error\n");break;
@@ -85,6 +97,7 @@ int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
 	dirBuf.entrys[pos].i_node_num=ipos;
 	strcpy(dirBuf.entrys[pos].dirName,lastName);
 	dirBuf.is_changed=1;
+	flushDirBuf();
 	return NO_DIR_ERROR;
 }
 
@@ -103,9 +116,10 @@ int _delete_dir_entry(char* name)
 	{
 		dirBuf.entrys[index].i_node_num=-1;
 		dirBuf.is_changed=1;
+		flushDirBuf();
 		return NO_DELETE_ERROR; 
 	}
-	else
+	printf("unknown delete dir error\n");
 		return DELETE_ENTRY_ERROR;
 }
 
@@ -131,7 +145,7 @@ static char* moveToDir(char* name)
 			return NULL;
 		}
 		const struct inode* node = findINode(dirBuf.entrys[index].i_node_num);
-		readDirBuf(node->i_zone[0]);
+		readDirBuf(node->i_zone[0]+get_first_data_zone());
 		temp1=temp2+1;
 		temp2=strchr(temp1,'/');
 	}
@@ -140,7 +154,13 @@ static char* moveToDir(char* name)
 	return last;
 }
 
-
+static void flushDirBuf()
+{
+	if(dirBuf.is_changed==1)
+	{
+		_write_to_buf((const blk*)dirBuf.entrys,dirBuf.no);
+	}
+}
 
 short _findINodeByName(char* name)
 {
@@ -166,6 +186,7 @@ static int findEntryByName(char* name)
 	{
 		if(dirBuf.entrys[i].i_node_num!=-1&&strcmp(dirBuf.entrys[i].dirName,name)==0)
 		{
+		printf("equal 1=%s,2=%s\n",name,dirBuf.entrys[i].dirName);
 			return i;
 		}
 	}

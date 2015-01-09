@@ -12,9 +12,11 @@
  *
  * =================================================
  */
+#include "config.h"
 
 #ifndef DIR_ENTRY_H_HEADER
 #define DIR_ENTRY_H_HEADER
+
 
 
 

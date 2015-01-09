@@ -79,9 +79,10 @@ const blk* _read_from_buf(int blockNo)
 	{
 		pos=findEmptyPos();
 		_read(&buf.blks[pos],blockNo);
-		buf.blk_pos[pos]=blockNo;
+ 		buf.blk_pos[pos]=blockNo;
+		buf.blks[pos].is_changed=0;
 	}
-	return &buf.blks[pos];
+ 	return &buf.blks[pos];
 }
 
 void _write_to_buf(const blk* block,int blockNo)
@@ -94,9 +95,17 @@ void _write_to_buf(const blk* block,int blockNo)
 		buf.blk_pos[pos]=blockNo;
 	}
 	buf.blks[pos]=*block;
-	buf.blks[pos].is_changed=1;
+ 	buf.blks[pos].is_changed=1;
 }
 
+void flushBuff()
+{
+	for(int i=0;i<buf.blk_size;i++)
+	{
+		if(buf.blk_pos[i]>0 && buf.blks[i].is_changed==1)
+			_write(&buf.blks[i],buf.blk_pos[i]);
+	}
+}
 
 
 

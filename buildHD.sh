@@ -6,4 +6,4 @@
 ##################################################
 #!/bin/bash
 
-./disk/a.out ./build/hd
+./disk/a.out ./build/hd < hdsize.txt

@@ -33,7 +33,7 @@ static bit_map zmap;
 static unsigned int findPos(bit_map* map);
 static void release_a_bit(bit_map* map,unsigned int bit_pos);
 static void init_map(bit_map* map,int from_logical_no,int logical_block_num);
-static void release(bit_map* map);
+static void release(bit_map* map,int from_logical_no,int logical_block_num);
 
 
 
@@ -66,13 +66,13 @@ static void release_a_bit(bit_map* map,unsigned int bit_pos)
 void initBitMap()
 {
 	init_map(&imap,2,get_s_imap_blocks());
-	init_map(&zmap,2+get_s_imap_blocks(),get_s_zmap_blocks());
+	init_map(&zmap ,2+get_s_imap_blocks(),get_s_zmap_blocks());
 }
 
 void releaseBitMap()
 {
-	release(&imap);
-	release(&zmap);
+	release(&imap,2,get_s_imap_blocks());
+	release(&zmap,2+get_s_imap_blocks(),get_s_zmap_blocks());
 }
 unsigned int findIPos()
 {
@@ -102,9 +102,12 @@ static void init_map(bit_map* map,int from_logical_no,int logical_block_num)
 		my_memcpy(block->data,map->mapArea+i*LOGICAL_BLOCK_SIZE,map->size_byte);
 	}
 }
-static void release(bit_map* map)
+static void release(bit_map* map,int from_logical_no,int logical_block_num)
 {
-	free(map->mapArea);
+	for(int i=0;i<logical_block_num;i++){
+		_write_to_buf((const blk*)(map->mapArea+i*LOGICAL_BLOCK_SIZE),from_logical_no+i);
+	}
+	//free(map->mapArea);
 }
 static void print_bit_map(bit_map* map)
 {	

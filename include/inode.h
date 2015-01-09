@@ -33,9 +33,10 @@ struct inode
 	short i_zone[9];	//文件所占用磁盘块号数组
 };
 
-short insertINode(struct inode* inode);
+short insertINode(const struct inode* inode);
 void deleteINode(unsigned int pos);
 void initINode();
-struct inode* findINode(unsigned int pos);
+const struct inode* findINode(unsigned int pos);
+void modifyINode(short pos,const struct inode* node);
 
 #endif
