@@ -1,17 +1,18 @@
 /*
  * =================================================
  *
- *       Filename:  test/fs/write_file_test.c
+ *       Filename:  test/fs/open_read_test.c
  *
  *    Description:  
  *
  *        Version:  0.01
- *        Created:  Fri Jan  9 23:41:30 2015
+ *        Created:  Sat Jan 10 04:23:32 2015
  *         Author:  westion, westion717@gmail.com
  *        Company:  ZJUT
  *
  * =================================================
  */
+
 #include<stdio.h>
 #include <string.h>
 #include "buffer.h"
@@ -30,24 +31,23 @@ int main(int argc, char** argv){
 	initBitMap();
 	initRootDir();
 	initINode();
+	//printBitMap();
 
-	printBitMap();
+	File* fp = _open_file("/home/me/a.txt",MODE_READ,1);
 
-	short i = _findINodeByName("/home/me/a.txt");
+	if(fp!=NULL)
+	{
+		printf("open success\n");
+	}
 
-	struct inode node = *findINode(i);
+	char s[50];
+
+	_read_file(fp,s,50,1);
+
 	
-
-	char* s="This is a test\n";
-
-	_write_file(&node,s,0,strlen(s));
-	modifyINode(i,&node);
-	printBitMap();
-
-	printDirInfo();
-
-	releaseBitMap();
-	flushBuff();
+	printf("%s",s);
+	//releaseBitMap();
+	//flushBuff();
 
     return 0;
 }

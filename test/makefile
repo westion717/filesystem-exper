@@ -19,4 +19,6 @@ t_delete_dir:
 	$(CC) $(ARGS) $(SOURCE)/*.c ./dir_entry/delete_entry_test.c -o ./dir_entry/delete_entry_test.out
 t_write_file:
 	$(CC) $(ARGS) $(SOURCE)/*.c ./fs/write_file_test.c -o ./fs/write_file_test.out
+t_read_file:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./fs/open_read_test.c -o ./fs/open_read_test.out
 

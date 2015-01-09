@@ -19,14 +19,158 @@
 #include "buffer.h"
 #include "tool.h"
 #include "super.h"
+#include "dir_entry.h"
 #include <time.h>
 #include <stdio.h>
 
+
+
+static File openfiles[MAX_OPEN_NUM];
 
 static short write_one_zone(struct inode* node,const blk* block,int zone_num);
 static short calLogicalPos(struct inode* node,short zone_num);
 static short newAIndexBlock();
 static void deleteNormalFile(const struct inode* node);
+static const blk* read_one_block(const struct inode* node,int zone_num);
+
+static File* findEmptyPos()
+{
+	for(int i=0;i<MAX_OPEN_NUM;i++)
+	{
+		if(openfiles[i].fid==0)
+			return &openfiles[i];
+	}
+	printf("file list is full \n");
+	return NULL;
+}
+
+static File* isInOpenList(short inode_num)
+{
+	for(int i=0;i<MAX_OPEN_NUM;i++)
+	{
+		if(openfiles[i].inode_num==inode_num)
+			return &openfiles[i];
+	}
+	return NULL;
+}
+
+File* _open_file(char* name,char mode,char uid)
+{
+	short inode_num = _findINodeByName(name);
+	if(inode_num==NO_SUCH_ENTRY)
+	{
+		printf("no such file\n");
+		return NULL;
+	}
+	File* file=isInOpenList(inode_num);
+	if(file!=NULL)
+	{
+		if(file->openmode==MODE_WRITE || file->openmode==MODE_READ_AND_WRITE){
+			printf("file has been opened by other process\n");
+			return NULL;
+		}
+		else
+			return file;
+	}
+	const struct inode* node = findINode(inode_num);
+
+	if(node->i_mode==MODE_DIR)
+	{
+		printf("can not open dir\n");
+		return NULL;
+	}
+
+	file = findEmptyPos();
+	if(file==NULL)
+		return NULL;
+
+	file->openmode=mode;
+	file->u_id=uid;
+	file->inode_num=inode_num;
+	file->fid=time(NULL);
+	file->file_size=node->i_size;
+
+	switch(mode)
+	{
+		default:file->file_ptr=0;break;
+	}
+	return file;
+}
+
+int _read_file(File* fp,void* des,long size,short uid)
+{
+	if(fp==NULL)
+		return 0;
+	fp = isInOpenList(fp->inode_num);
+	if(fp==NULL)
+	{
+		printf("the file has not been opened\n");
+		return 0;
+	}
+	if(fp->u_id!=uid)
+	{
+		printf("the file has been opened by others\n");
+		return 0;
+	}
+
+	long realSize=0;
+
+	const struct inode* node=findINode(fp->inode_num);
+
+	int zone_num=fp->file_ptr/LOGICAL_BLOCK_SIZE;
+	int block_rest = fp->file_ptr%LOGICAL_BLOCK_SIZE;
+
+	if(block_rest!=0)
+	{
+		const blk *block=read_one_block(node,zone_num);
+		if(block==NULL)
+		{
+			printf("read error\n");
+			return 0;
+		}
+		int restpart=LOGICAL_BLOCK_SIZE-block_rest;
+		if(size<restpart)
+		{
+			my_memcpy((char*)block->data+block_rest,des,size);
+			realSize+=size;
+			size=0;
+		}
+		else
+		{
+			my_memcpy((char*)block->data+block_rest,des,restpart);
+			size-=restpart;
+			des+=restpart;
+			realSize+=restpart;
+		}
+		zone_num++;
+	}
+
+	if(size<=0)
+	{
+		return realSize;
+	}
+
+	const blk *b;
+	while(size>0)
+	{
+		b=read_one_block(node,zone_num);
+		if(size<=LOGICAL_BLOCK_SIZE)
+		{
+			my_memcpy(b->data,des,size);
+			realSize+=size;
+			break;
+		}
+		else
+		{
+			my_memcpy(b->data,des,LOGICAL_BLOCK_SIZE);
+			des+=LOGICAL_BLOCK_SIZE;			
+			size-=LOGICAL_BLOCK_SIZE;
+			realSize+=LOGICAL_BLOCK_SIZE;
+			zone_num++;
+		}
+	}
+	return realSize;
+}
 
 short _create_file(short imode,short i_uid,char i_gid)
 {
@@ -148,6 +292,7 @@ int _write_file(struct inode* node,void* src,long offset,long size)
 			src+=LOGICAL_BLOCK_SIZE;			
 			size-=LOGICAL_BLOCK_SIZE;
 			write_one_zone(node,&b,zone_num);
+			zone_num++;
 		}
 	}
 	if(node->i_size<offset+size)
@@ -214,6 +359,47 @@ static short write_one_zone(struct inode* node,const blk* block,int zone_num)
 	short index = calLogicalPos(node,zone_num);
 	_write_to_buf(block,index+get_first_data_zone());
 	return WRITE_SUCCESS;
+}
+static const blk* read_one_block(const struct inode* node,int zone_num)
+{
+	const blk* blk = NULL;
+	if(zone_num<7)
+	{
+		if(node->i_zone[zone_num]!=-1){
+			blk=_read_from_buf(node->i_zone[zone_num]+get_first_data_zone());
+
+
+			return blk;
+		}
+		else
+			return NULL;
+	}
+
+	zone_num-=7;
+	if(zone_num<512)
+	{
+		if(node->i_zone[7]!=-1)
+		{
+			blk = _read_from_buf(node->i_zone[7]);
+			short index=*((short*)blk->data+zone_num);
+			if(index==-1)
+				return NULL;
+		}
+		else
+			return NULL;
+	}
+	zone_num-=512;
+	if(node->i_zone[8]!=-1)
+	{
+		blk = _read_from_buf(node->i_zone[8]);
+		short index=*((short*)blk->data+zone_num);
+		if(index==-1)
+			return NULL;
+	}
+	else
+		return NULL;
+
+	return blk;
 }
 
 static short newAIndexBlock()
