@@ -45,9 +45,9 @@ short _create_file(short imode,short i_uid,char i_gid)
 	{
 		case MODE_DIR:break;
 		case MODE_FILE:
-		node.i_size=0;
-			break;
-		
+					  node.i_size=0;
+					  break;
+
 	}
 
 	short result = insertINode(&node);
@@ -109,32 +109,37 @@ int _write_file(struct inode* node,void* src,long offset,long size)
 
 	if(block_rest!=0)
 	{
-		blk block=*_read_from_buf(calLogicalPos(node,zone_num));
+		blk block=*_read_from_buf(calLogicalPos(node,zone_num)+get_first_data_zone());
 		int restpart=LOGICAL_BLOCK_SIZE-block_rest;
 		if(size<restpart)
 		{
-			my_memcpy(src,block.data+block_rest,size);
+			my_memcpy(src,(char*)block.data+block_rest,size);
 			size=0;
 		}
 		else
 		{
-			my_memcpy(src,block.data+block_rest,restpart);
+			my_memcpy(src,(char*)block.data+block_rest,restpart);
 			size-=restpart;
 			src+=restpart;
 		}
 		write_one_zone(node,&block,zone_num);
 		zone_num++;
 	}
-	if(size<=0)
-		return WRITE_SUCCESS;
 
+	if(size<=0)
+	{
+		if(node->i_size<offset+size)
+			node->i_size=offset+size;
+		return WRITE_SUCCESS;
+	}
+
+	blk b;
 	while(size>0)
 	{
-		blk b;
 		if(size<=LOGICAL_BLOCK_SIZE)
 		{
 			my_memcpy(src,b.data,size);
-			src+=size;
+			write_one_zone(node,&b,zone_num);
 			break;
 		}
 		else
@@ -142,9 +147,11 @@ int _write_file(struct inode* node,void* src,long offset,long size)
 			my_memcpy(src,b.data,LOGICAL_BLOCK_SIZE);
 			src+=LOGICAL_BLOCK_SIZE;			
 			size-=LOGICAL_BLOCK_SIZE;
-		}
 			write_one_zone(node,&b,zone_num);
+		}
 	}
+	if(node->i_size<offset+size)
+		node->i_size=offset+size;
 	return WRITE_SUCCESS;
 }
 

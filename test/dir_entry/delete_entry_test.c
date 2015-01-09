@@ -38,5 +38,8 @@ int main(int argc, char** argv){
 
 	printDirInfo();
 
+	releaseBitMap();
+	flushBuff();
+
     return 0;
 }

@@ -17,4 +17,6 @@ t_find_dir:
 	$(CC) $(ARGS) $(SOURCE)/*.c ./dir_entry/find_dir_test.c -o ./dir_entry/find_dir_test.out
 t_delete_dir:
 	$(CC) $(ARGS) $(SOURCE)/*.c ./dir_entry/delete_entry_test.c -o ./dir_entry/delete_entry_test.out
+t_write_file:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./fs/write_file_test.c -o ./fs/write_file_test.out
 
