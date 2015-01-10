@@ -1,24 +1,27 @@
 /*
  * =================================================
  *
- *       Filename:  init.h
+ *       Filename:  source/env.c
  *
  *    Description:  
  *
  *        Version:  0.01
- *        Created:  Sat Dec 27 20:46:40 2014
+ *        Created:  Sat Jan 10 04:43:35 2015
  *         Author:  westion, westion717@gmail.com
  *        Company:  ZJUT
  *
  * =================================================
  */
 
-
-#ifndef INIT_H_HEADER
-#define INIT_H_HEADER
-
-void initFS();
-void stopFS();
+#include "env.h"
 
 
-#endif
+short getUid()
+{
+	return 1;
+}
+
+short getGid()
+{
+	return 1;
+}

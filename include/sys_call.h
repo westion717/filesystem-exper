@@ -20,6 +20,13 @@
 
 
 
-File* open(char* filename,char* mode,short uid);
+File* open(char* filename,char* mode);
+int read(File* fp,void* des,long size);
+void close(File* fp);
+int create(char* name,char mode);
+int delete(char* name);
+int my_rename(char*oldName,char* newName);
+file_list lsfile(char* name);
+
 
 #endif

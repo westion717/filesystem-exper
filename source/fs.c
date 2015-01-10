@@ -44,7 +44,7 @@ static File* findEmptyPos()
 	return NULL;
 }
 
-static File* isInOpenList(short inode_num)
+File* isInOpenList(short inode_num)
 {
 	for(int i=0;i<MAX_OPEN_NUM;i++)
 	{
@@ -52,6 +52,14 @@ static File* isInOpenList(short inode_num)
 			return &openfiles[i];
 	}
 	return NULL;
+}
+
+
+void _close_file(File *fp)
+{
+	fp=isInOpenList(fp->inode_num);
+	flushBuff();
+	fp->fid=0;
 }
 
 File* _open_file(char* name,char mode,char uid)

@@ -13,16 +13,25 @@
  * =================================================
  */
 #include<stdio.h>
-#include "super.h"
-#include "inode.h"
 #include "buffer.h"
 #include "hd.h"
+#include "super.h"
+#include "bitmap.h"
+#include "inode.h"
+#include "dir_entry.h"
 
 void initFS()
 {
-
-	initFile("./input.txt");
-	initSuperBlock(HD_SIZE);
+	initFile("../../build/hd");
 	initDiskBuf();
+	initSuperBlock();
+	initBitMap();
+	initRootDir();
 	initINode();
+}
+
+void stopFS()
+{
+	releaseBitMap();
+	flushBuff();
 }

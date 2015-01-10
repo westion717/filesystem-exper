@@ -13,6 +13,7 @@
  * =================================================
  */
 #include "inode.h"
+#include "dir_entry.h"
 
 #ifndef FS_H_HEADER
 #define FS_H_HEADER
@@ -25,11 +26,13 @@
 #define WRITE_ERROR -3
 #define WRITE_SUCCESS 3
 #define NO_REASON_ERROR -4
+#define RENAME_ERROR 0
 
 
 #define MODE_READ 1
 #define MODE_WRITE 2
 #define MODE_READ_AND_WRITE 3
+
 
 
 
@@ -43,6 +46,7 @@ typedef struct OpenFile
 	long file_size;
 }File;
 
+File* isInOpenList(short inode_num);
 
 short _create_file(short imode,short i_uid,char i_gid);
 
@@ -52,5 +56,6 @@ int _write_file(struct inode* node,void* src,long offset,long size);
 
 File* _open_file(char* name,char mode,char uid);
 int _read_file(File* fp,void* des,long size,short uid);
+void _close_file(File *fp);
 
 #endif

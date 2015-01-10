@@ -77,7 +77,7 @@ int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
 				{
 					deleteINode(ipos);
 					printf("logical is full");
-					return NO_DIR_ERROR; 
+					return ADD_ENTRY_ERROR; 
 				}
 
 				dir_entry entrys[LOGICAL_BLOCK_SIZE/16];
@@ -103,9 +103,14 @@ int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid)
 
 int _delete_dir_entry(char* name)
 {
-	moveToDir(name);
-	char* last = strrchr(name,'/');
-	int index = findEntryByName(last+1);
+char*	last = moveToDir(name);
+if(last==NULL)
+{
+		printf("no such file\n");
+		return NO_SUCH_ENTRY;
+
+}
+	int index = findEntryByName(last);
 	if(index==NO_SUCH_ENTRY)
 	{
 		printf("no such file\n");
@@ -145,6 +150,8 @@ static char* moveToDir(char* name)
 			return NULL;
 		}
 		const struct inode* node = findINode(dirBuf.entrys[index].i_node_num);
+		if(node->i_mode!=MODE_DIR)
+			return NULL;
 		readDirBuf(node->i_zone[0]+get_first_data_zone());
 		temp1=temp2+1;
 		temp2=strchr(temp1,'/');
@@ -162,12 +169,63 @@ static void flushDirBuf()
 	}
 }
 
+short _renameFile(char* oldName,char* newName)
+{
+	char* lastName=moveToDir(oldName);
+	if(lastName==NULL)
+	{
+		printf("no such dir for %s\n",oldName);
+		return NO_SUCH_ENTRY;
+	}
+
+	int index = findEntryByName(lastName);
+	if(index==NO_SUCH_ENTRY)
+	{
+		printf("no such file\n");
+		return NO_SUCH_ENTRY;
+	}
+	char* temp=strchr(newName,'/');
+	if(temp!=NULL)
+		newName=temp++;
+	strcpy(dirBuf.entrys[index].dirName,newName);
+	return RENAME_OK;
+}
+
+file_list _lsfile(char* name)
+{
+	file_list file_l;
+	file_l.size=0;
+	short i = _findINodeByName(name);
+	if(i==NO_SUCH_ENTRY)
+	{
+		file_l.size=-1;
+		return file_l;
+	}
+	const struct inode* node = findINode(i);
+	if(node->i_mode!=MODE_DIR)
+	{
+		printf("you can not list file\n");
+		file_l.size=-1;
+	 	return file_l; 
+	}
+
+for(int i=0;i<dirBuf.size;i++)
+{
+	if(dirBuf.entrys[i].i_node_num!=-1)
+	{
+		strcpy(dirBuf.entrys[i].dirName,file_l.names[i]);
+		file_l.size++;
+	}
+}
+	return file_l;
+}
+
 short _findINodeByName(char* name)
 {
 	char* lastName=moveToDir(name);
 	if(lastName==NULL)
 	{
-		printf("no such dir for %s\n",name);
+	 	printf("no such dir for %s\n",name);
 		return NO_SUCH_ENTRY;
 	}
 	int index = findEntryByName(lastName);
@@ -179,6 +237,18 @@ short _findINodeByName(char* name)
 	return dirBuf.entrys[index].i_node_num;
 }
 
+int isEmpty(char* name)
+{
+	name=moveToDir(name);
+	if(name==NULL)
+		return NO_SUCH_ENTRY;
+	for(int i=0;i<dirBuf.size;i++)
+	{
+		if(dirBuf.entrys[i].i_node_num>0)
+			return 0;
+	}
+	return 1;
+}
 
 static int findEntryByName(char* name)
 {

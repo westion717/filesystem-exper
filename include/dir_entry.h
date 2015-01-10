@@ -26,8 +26,14 @@
 #define ADD_ENTRY_ERROR -2
 #define NO_SUCH_ENTRY -3
 #define DELETE_ENTRY_ERROR -4
+#define RENAME_OK 5
 
 
+
+typedef struct fileList{
+	char names[100][16];
+	int size;
+}file_list;
 
 typedef struct DirEntry
 {
@@ -45,7 +51,10 @@ typedef struct DirBuf
 }dir_buf;
 
 
+int isEmpty(char* name);
+short _renameFile(char* oldName,char* newName);
 
+file_list _lsfile(char* name);
 
 int _create_dir_entry(char* name,short i_mode,short i_uid,char i_gid);
 short _findINodeByName(char* name);
