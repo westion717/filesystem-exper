@@ -107,7 +107,6 @@ File* _open_file(char* name,char mode,char uid)
 
 int _read_file(File* fp,void* des,long size,short uid)
 {
-	size=size > fp->file_size ?fp->file_size:size;
 
 	if(fp==NULL)
 		return 0;
@@ -123,6 +122,8 @@ int _read_file(File* fp,void* des,long size,short uid)
 		return 0;
 	}
 
+
+	size=size > fp->file_size ?fp->file_size:size;
 	long realSize=0;
 
 	const struct inode* node=findINode(fp->inode_num);

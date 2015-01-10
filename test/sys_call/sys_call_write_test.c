@@ -23,7 +23,7 @@ int main(int argc, char** argv){
 
 	initFS();
 	
-	char* s="This is Robert Wu who is using this\n fucking system\n";
+	char* s="11123123123213131312312dsfsdfsdfs";
 
 	if(create("/home/Robert/test.ttt",MODE_FILE)>0)
 	{

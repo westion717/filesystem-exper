@@ -21,18 +21,20 @@ int main(int argc, char** argv){
 
 	initFS();
 	
-	char* s="This is Robert Wu who is using this\n fucking system\n";
 	
 	char data[50];
 
 	File* fp = open("/home/me/a.txt","r");
-	read(fp,data,50);
+	if(fp==NULL)
+	{
+		printf("open failed\n");
+		return 1;
+	}
+	int result = read(fp,data,50);
 
-
-	printf("%ld",fp->file_size);
+	printf("%d\n",result);
 	printf("%s",data);
 
-	//create("/home/Robert",MODE_DIR);
 
 
 	stopFS();
