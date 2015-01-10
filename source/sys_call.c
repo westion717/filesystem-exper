@@ -55,10 +55,26 @@ int my_rename(char*oldName,char* newName)
 		return RENAME_ERROR; 
 	}
 	if(_renameFile(oldName,newName)!=RENAME_OK)
-		return RENAME_ERROR;
-	return 1;
+		return ERROR;
+	return SUCCESS;
 }
 
+int write(File* fp,const void* src,long offset,long size)
+{
+	fp=isInOpenList(fp->inode_num);
+	if(fp==NULL)
+	{
+		printf("write error without opening");
+	}
+
+	struct inode node= *findINode(fp->inode_num);
+
+	long realSize=_write_file(&node,src,offset,size);
+
+	modifyINode(fp->inode_num,&node);
+
+	return realSize;
+}
 
 
 int delete(char* name)
@@ -80,9 +96,9 @@ int delete(char* name)
 		return 0; 
 	}
 	if(_delete_dir_entry(name)==NO_DELETE_ERROR)
-		return 1;
+		return SUCCESS;
 	else
-		return 0;
+		return ERROR;
 }
 
 int create(char* name,char mode)

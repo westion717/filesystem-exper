@@ -208,12 +208,13 @@ file_list _lsfile(char* name)
 		file_l.size=-1;
 	 	return file_l; 
 	}
+	readDirBuf(node->i_zone[0]+get_first_data_zone());
 
 for(int i=0;i<dirBuf.size;i++)
 {
 	if(dirBuf.entrys[i].i_node_num!=-1)
 	{
-		strcpy(dirBuf.entrys[i].dirName,file_l.names[i]);
+		strcpy(file_l.names[i],dirBuf.entrys[i].dirName);
 		file_l.size++;
 	}
 }
@@ -222,6 +223,9 @@ for(int i=0;i<dirBuf.size;i++)
 
 short _findINodeByName(char* name)
 {
+	//如果文件名是/，代表0号物理块，也就是根目录所在的第一块物理快
+	if(strcmp(name,"/")==0)
+		return 1;
 	char* lastName=moveToDir(name);
 	if(lastName==NULL)
 	{
@@ -256,7 +260,6 @@ static int findEntryByName(char* name)
 	{
 		if(dirBuf.entrys[i].i_node_num!=-1&&strcmp(dirBuf.entrys[i].dirName,name)==0)
 		{
-		printf("equal 1=%s,2=%s\n",name,dirBuf.entrys[i].dirName);
 			return i;
 		}
 	}

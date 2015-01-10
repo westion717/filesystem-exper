@@ -21,6 +21,14 @@ t_write_file:
 	$(CC) $(ARGS) $(SOURCE)/*.c ./fs/write_file_test.c -o ./fs/write_file_test.out
 t_read_file:
 	$(CC) $(ARGS) $(SOURCE)/*.c ./fs/open_read_test.c -o ./fs/open_read_test.out
-t_syscall:
-	$(CC) $(ARGS) $(SOURCE)/*.c ./sys_call/sys_call_test.c -o ./sys_call/sys_call.out
+t_syscall_ls:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./sys_call/sys_call_ls_test.c -o ./sys_call/sys_call_ls_test.out
+t_syscall_read:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./sys_call/sys_call_read_test.c -o ./sys_call/sys_call_read_test.out
+t_syscall_create:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./sys_call/sys_call_create_test.c -o ./sys_call/sys_call_create_test.out
+t_syscall_write:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./sys_call/sys_call_write_test.c -o ./sys_call/sys_call_write_test.out
+t_syscall_delete:
+	$(CC) $(ARGS) $(SOURCE)/*.c ./sys_call/sys_call_delete_test.c -o ./sys_call/sys_call_delete_test.out
 

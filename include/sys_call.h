@@ -18,6 +18,8 @@
 #ifndef SYS_CALL_H_HEADER
 #define SYS_CALL_H_HEADER
 
+#define SUCCESS 1
+#define ERROR 0
 
 
 File* open(char* filename,char* mode);
@@ -28,5 +30,6 @@ int delete(char* name);
 int my_rename(char*oldName,char* newName);
 file_list lsfile(char* name);
 
+int write(File* file,const void* src,long offset,long size);
 
 #endif

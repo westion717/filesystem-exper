@@ -107,6 +107,8 @@ File* _open_file(char* name,char mode,char uid)
 
 int _read_file(File* fp,void* des,long size,short uid)
 {
+	size=size > fp->file_size ?fp->file_size:size;
+
 	if(fp==NULL)
 		return 0;
 	fp = isInOpenList(fp->inode_num);
@@ -246,7 +248,7 @@ static void deleteNormalFile(const struct inode* node)
 	}
 }
 
-int _write_file(struct inode* node,void* src,long offset,long size)
+int _write_file(struct inode* node,const void* src,long offset,long size)
 {	
 
 	if(offset+size>LOGICAL_BLOCK_SIZE*7+LOGICAL_BLOCK_SIZE*1024)

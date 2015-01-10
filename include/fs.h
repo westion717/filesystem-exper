@@ -52,7 +52,7 @@ short _create_file(short imode,short i_uid,char i_gid);
 
 int _delete_file(unsigned int pos);
 
-int _write_file(struct inode* node,void* src,long offset,long size);
+int _write_file(struct inode* node,const void* src,long offset,long size);
 
 File* _open_file(char* name,char mode,char uid);
 int _read_file(File* fp,void* des,long size,short uid);
